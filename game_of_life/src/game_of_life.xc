@@ -96,19 +96,19 @@ void export_controller(server interface cell_to_export_controller cells[n], unsi
 }
 
 void printer(server interface cell_to_printer cells[n], unsigned n) {
-    if (n > 50) {
-        fprintf(stderr, "Cannot handle more than 50 cells.\n");
+    if (n > 5) {
+        fprintf(stderr, "Cannot handle more than 5 cells.\n");
         return;
     }
 
-    int current_state[50] = {0};
+    int current_state[5] = {0};
 
     while(1) {
         select {
             case cells[int i].print_cell(int cell_number, int round):
                 current_state[cell_number] = round;
 
-                printf("|%d|%d|%d|%d|%d|%d|\n", current_state[0], current_state[1], current_state[2], current_state[3], current_state[4], current_state[5]);
+                printf("|%d|%d|%d|%d|%d|\n", current_state[0], current_state[1], current_state[2], current_state[3], current_state[4]);
                 break;
         }
     }
