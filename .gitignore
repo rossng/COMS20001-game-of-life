@@ -1,0 +1,18 @@
+*/.build_*/*
+*/.build/*
+*/bin/*
+*.o
+*.xe
+*.vcd
+*.s
+*.xi
+*.i
+*.a
+#do not check in depdendency files
+*.xc.d
+*.c.d
+*.s.d
+#do not check in eclipse project files
+.project
+.cproject
+/.metadata
