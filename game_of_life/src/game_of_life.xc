@@ -25,58 +25,59 @@ void printer(server interface i_printer_worker workers[n], unsigned n) {
     }
 }
 
-void worker(int id,
-          streaming chanend ?lin, streaming chanend ?lout,
-          streaming chanend ?rin, streaming chanend ?rout,
-          client interface i_printer_worker printer,
-          client interface i_io_worker io,
-          client interface i_pauser_worker pauser
-) {
+[[combinable]]
+void worker(
+        int id,
+        streaming chanend ?lin, streaming chanend ?lout,
+        streaming chanend ?rin, streaming chanend ?rout,
+        client interface i_printer_worker printer,
+        client interface i_io_worker io,
+        client interface i_pauser_worker pauser
+        ) {
     int round = 0;
     int max_round = -1;
     int paused = 0;
 
-        while (1) {
-            io.report_round(round);
-            printer.update(id, round);
+    while (1) {
+        io.report_round(round);
+        printer.update(id, round);
 
-            select {
-                case pauser.pause_work():
-                    paused = 1;
-                    printf("Cell %d paused\n", id);
-                    break;
-                case io.trigger_export():
-                    max_round = io.get_round_to_export_at();
-                    break;
-                default:
-                    break;
-            }
-
-            while(paused) {
-                delay_milliseconds(500);
-                paused = pauser.still_paused();
-            }
-
-            if (round == max_round) {
-                printf("Cell number %d reached max_round: %d\n", id, max_round);
-            }
-
-            if (!isnull(lout)) {
-                lout <: 1;
-            }
-            if (!isnull(rout)) {
-                rout <: 1;
-            }
-            if (!isnull(lin)) {
-                lin :> int temp;
-            }
-            if (!isnull(rin)) {
-                rin :> int temp;
-            }
-
-            // update self here
-
-            round++;
-
+        select {
+            case pauser.pause_work():
+                paused = 1;
+                printf("Cell %d paused\n", id);
+                break;
+            case io.trigger_export():
+                max_round = io.get_round_to_export_at();
+                break;
+            default:
+                break;
         }
+
+        while(paused) {
+            delay_milliseconds(500);
+            paused = pauser.still_paused();
+        }
+
+        if (round == max_round) {
+            printf("Cell number %d reached max_round: %d\n", id, max_round);
+        }
+
+        if (!isnull(lout)) {
+            lout <: 1;
+        }
+        if (!isnull(rout)) {
+            rout <: 1;
+        }
+        if (!isnull(lin)) {
+            lin :> int temp;
+        }
+        if (!isnull(rin)) {
+            rin :> int temp;
+        }
+
+        // update self here
+
+        round++;
+    }
 }

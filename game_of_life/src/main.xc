@@ -3,10 +3,17 @@
 #include <xs1.h>
 #include <platform.h>
 #include <timer.h>
+#include "i2c.h"
 #include "io.h"
 #include "game_of_life.h"
+#include "accelerometer_defs.h"
 
+// buttons port
 on tile[0] : in port buttons_port = XS1_PORT_4E;
+
+// accelerometer ports
+on tile[1]: port p_scl = XS1_PORT_1E;
+on tile[1]: port p_sda = XS1_PORT_1F;
 
 void button_listener(in port buttons, client interface i_io_control io) {
 
@@ -25,11 +32,14 @@ void button_listener(in port buttons, client interface i_io_control io) {
 }
 
 int main(void) {
+    i2c_master_if i2c[1];
+
     streaming chan c[8];
     interface i_printer_worker r[5];
     interface i_io_worker io_w[5];
-    interface i_pauser_worker p[5];
     interface i_io_control io_c;
+    interface i_pauser_worker p[5];
+    interface i_pauser_control p_c;
 
      /*
       *           <-0- <-2- <-4- <-6-
@@ -40,7 +50,9 @@ int main(void) {
     par {
         on tile[0]:     printer(r, 5);
         on tile[0]:     io(io_w, 5, io_c);
-        on tile[1]:     pauser(p, 5);
+        on tile[1] :    i2c_master(i2c, 1, p_scl, p_sda, 10);
+        on tile[1]:     accelerometer(i2c[0], p_c);
+        on tile[1]:     pauser(p, 5, p_c);
         on tile[0]:     button_listener(buttons_port, io_c);
 
         on tile[0]:     worker(0, null, null, c[0], c[1], r[0], io_w[0], p[0]); // worker 0

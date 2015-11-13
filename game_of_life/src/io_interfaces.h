@@ -18,4 +18,9 @@ interface i_pauser_worker {
     [[clears_notification]] int still_paused();
 };
 
+interface i_pauser_control {
+    void pause();
+    void unpause();
+};
+
 #endif /* IO_INTERFACES_H_ */
